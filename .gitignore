@@ -6,6 +6,5 @@ build/
 dist/
 *.mypy_cache
 *.env
-test-main.py
 .vscode
 covid19_horiz_desc.mp4
