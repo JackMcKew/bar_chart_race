@@ -8,3 +8,4 @@ dist/
 *.env
 test-main.py
 .vscode
+covid19_horiz_desc.mp4
