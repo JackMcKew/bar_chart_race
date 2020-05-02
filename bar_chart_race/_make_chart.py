@@ -3,7 +3,7 @@ import numpy as np
 import matplotlib.pyplot as plt
 from matplotlib.animation import FuncAnimation
 from matplotlib import ticker, colors
-from typing import Tuple
+from typing import Tuple, Optional
 
 DARK24 = [
     "#2E91E5",
@@ -36,7 +36,7 @@ DARK24 = [
 class _BaseChart:
     def __init__(
         self,
-        df: pd.DataFrame,
+        data: Optional(pd.DataFrame, pd.Series),
         use_index: bool,
         steps_per_period: int,
         period_length: int,
@@ -49,11 +49,11 @@ class _BaseChart:
         fig: plt.Figure,
         kwargs,
     ) -> None:
-        self.df = df
+        self.data = data,
         self.use_index = use_index
         self.steps_per_period = steps_per_period
         self.period_length = period_length
-        self.orig_index = self.df.index.astype("str")
+        self.orig_index = self.data.index.astype("str")
         self.title = title
         self.figsize = figsize
         self.dpi = dpi
@@ -86,7 +86,9 @@ class _BaseChart:
 class _LineChartRace(_BaseChart):
     def __init__(
         self,
-        df: pd.DataFrame,
+        series: pd.Series,
+        filename: str,
+        line_width: int,
         use_index: bool,
         steps_per_period: int,
         period_length: int,
@@ -100,7 +102,7 @@ class _LineChartRace(_BaseChart):
         kwargs,
     ) -> None:
         super().__init__(
-            df,
+            series,
             use_index,
             steps_per_period,
             period_length,
@@ -113,7 +115,38 @@ class _LineChartRace(_BaseChart):
             fig,
             kwargs,
         )
-        self.df = df
+        self.series = series
+        self.filename = filename
+        self.xdata = []
+        self.ydata = []
+        if self.fig is not None:
+            self.fig, self.ax = fig, fig.axes[0]
+            self.figsize = fig.get_size_inches()
+            self.dpi = fig.dpi
+        else:
+            self.fig = plt.figure()
+            self.ax = plt.axes()
+
+        self.line, = self.ax.plot([],[],line_width)
+
+    def plot_line(self, i):
+        self.xdata.append(self.series.iloc[i].index)
+        self.ydata.append(self.series.iloc[i])
+        self.line.set_data(xdata,ydata)
+        return self.line,
+
+
+    def make_animation(self):
+        def init_func():
+            self.line.set_data([],[])
+
+        anim = super().make_animation(range(len(self.df[self.values_column])), init_func)
+
+        extension = self.filename.split(".")[-1]
+        if extension == "gif":
+            anim.save(self.filename, fps=self.fps, writer="imagemagick")
+        else:
+            anim.save(self.filename, fps=self.fps)
 
 
 class _BarChartRace(_BaseChart):
@@ -415,6 +448,8 @@ class _BarChartRace(_BaseChart):
 
 def line_chart_race(
     df,
+    filename,
+    values_column,
     use_index,
     steps_per_period,
     period_length,
@@ -428,6 +463,8 @@ def line_chart_race(
 ):
     return _LineChartRace(
         df,
+        filename,
+        values_column,
         use_index,
         steps_per_period,
         period_length,
