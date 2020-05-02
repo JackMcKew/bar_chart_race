@@ -93,17 +93,55 @@ class _BaseChart:
     def anim_func(self, frame):
         print("Animation function not yet implemeneted.")
 
-    def make_animation(self,frames,init_func) -> FuncAnimation:
+    def make_animation(self, frames, init_func) -> FuncAnimation:
 
         interval = self.period_length / self.steps_per_period
         return FuncAnimation(
-                self.fig,
-                self.anim_func,
-                frames,
-                # range(len(self.df_values)),
-                init_func,
-                interval=interval,
-            )
+            self.fig,
+            self.anim_func,
+            frames,
+            # range(len(self.df_values)),
+            init_func,
+            interval=interval,
+        )
+
+
+class _LineChartRace(_BaseChart):
+    def __init__(
+        self,
+        df: pd.DataFrame,
+        orientation: str,
+        sort: str,
+        use_index: bool,
+        steps_per_period: int,
+        period_length: int,
+        title: str,
+        figsize: Tuple,
+        dpi: int,
+        tick_label_size: int,
+        bar_label_size: int,
+        period_label_size: int,
+        fig: plt.Figure,
+        kwargs,
+    ) -> None:
+        super().__init__(
+            df,
+            orientation,
+            sort,
+            use_index,
+            steps_per_period,
+            period_length,
+            title,
+            figsize,
+            144,
+            tick_label_size,
+            bar_label_size,
+            period_label_size,
+            fig,
+            kwargs,
+        )
+        self.df = df
+
 
 class _BarChartRace(_BaseChart):
     def __init__(
@@ -177,12 +215,12 @@ class _BarChartRace(_BaseChart):
     def validate_params(self):
         super().validate_params()
         if isinstance(self.filename, str):
-            if '.' not in self.filename:
-                raise ValueError('`filename` must have an extension')
-            if len(self.filename.split('.')[1]) <= 0:
-                raise ValueError('`filename` must have an extension')
+            if "." not in self.filename:
+                raise ValueError("`filename` must have an extension")
+            if len(self.filename.split(".")[1]) <= 0:
+                raise ValueError("`filename` must have an extension")
         elif self.filename is not None:
-            raise TypeError('`filename` must be None or a string')
+            raise TypeError("`filename` must be None or a string")
 
     def get_colors(self, cmap):
         if isinstance(cmap, str):
@@ -385,7 +423,7 @@ class _BarChartRace(_BaseChart):
         def init_func():
             self.plot_bars(0)
 
-        anim = super().make_animation(range(len(self.df_values)),init_func)
+        anim = super().make_animation(range(len(self.df_values)), init_func)
 
         if self.html:
             return anim.to_html5_video()
@@ -395,6 +433,39 @@ class _BarChartRace(_BaseChart):
             anim.save(self.filename, fps=self.fps, writer="imagemagick")
         else:
             anim.save(self.filename, fps=self.fps)
+
+
+def line_chart_race(
+    df,
+    orientation,
+    sort,
+    use_index,
+    steps_per_period,
+    period_length,
+    title,
+    figsize,
+    tick_label_size,
+    bar_label_size,
+    period_label_size,
+    fig,
+    **kwargs,
+):
+    return _LineChartRace(
+        df,
+        orientation,
+        sort,
+        use_index,
+        steps_per_period,
+        period_length,
+        title,
+        figsize,
+        144,
+        tick_label_size,
+        bar_label_size,
+        period_label_size,
+        fig,
+        kwargs,
+    )
 
 
 def bar_chart_race(
