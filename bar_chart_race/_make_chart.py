@@ -90,6 +90,20 @@ class _BaseChart:
         if self.fig is not None and not isinstance(self.fig, plt.Figure):
             raise TypeError("`fig` must be a matplotlib Figure instance")
 
+    def anim_func(self, frame):
+        print("Animation function not yet implemeneted.")
+
+    def make_animation(self,frames,init_func) -> FuncAnimation:
+
+        interval = self.period_length / self.steps_per_period
+        return FuncAnimation(
+                self.fig,
+                self.anim_func,
+                frames,
+                # range(len(self.df_values)),
+                init_func,
+                interval=interval,
+            )
 
 class _BarChartRace(_BaseChart):
     def __init__(
@@ -371,14 +385,7 @@ class _BarChartRace(_BaseChart):
         def init_func():
             self.plot_bars(0)
 
-        interval = self.period_length / self.steps_per_period
-        anim = FuncAnimation(
-            self.fig,
-            self.anim_func,
-            range(len(self.df_values)),
-            init_func,
-            interval=interval,
-        )
+        anim = super().make_animation(range(len(self.df_values)),init_func)
 
         if self.html:
             return anim.to_html5_video()
