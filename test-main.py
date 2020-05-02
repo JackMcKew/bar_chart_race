@@ -21,10 +21,12 @@ bar_race = bcr.bar_chart_race(
     period_label_size=16,
     fig=None)
 
+# print(bar_race.df_values)
+
 # bar_race.make_animation()
 
 line_race = bcr.line_chart_race(
-    series=df.sum(axis=1),
+    series=bar_race.df_values.diff().max(axis=1),
     filename='test-line.mp4',
     line_width=3,
     use_index=True,
@@ -42,7 +44,7 @@ line_race = bcr.line_chart_race(
 
 # print(line_race.anim_func(1))
 
-
+print(bar_race.df_values.diff().max(axis=1))
 
 print(bar_race.get_frames())
 
