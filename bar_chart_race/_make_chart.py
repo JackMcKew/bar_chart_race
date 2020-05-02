@@ -3,27 +3,62 @@ import numpy as np
 import matplotlib.pyplot as plt
 from matplotlib.animation import FuncAnimation
 from matplotlib import ticker, colors
+from typing import Tuple
 
-DARK24 = ['#2E91E5', '#E15F99', '#1CA71C', '#FB0D0D', '#DA16FF', '#222A2A', 
-          '#B68100', '#750D86', '#EB663B', '#511CFB', '#00A08B', '#FB00D1', 
-          '#FC0080', '#B2828D', '#6C7C32', '#778AAE', '#862A16', '#A777F1', 
-          '#620042', '#1616A7', '#DA60CA', '#6C4516', '#0D2A63', '#AF0038']
+DARK24 = [
+    "#2E91E5",
+    "#E15F99",
+    "#1CA71C",
+    "#FB0D0D",
+    "#DA16FF",
+    "#222A2A",
+    "#B68100",
+    "#750D86",
+    "#EB663B",
+    "#511CFB",
+    "#00A08B",
+    "#FB00D1",
+    "#FC0080",
+    "#B2828D",
+    "#6C7C32",
+    "#778AAE",
+    "#862A16",
+    "#A777F1",
+    "#620042",
+    "#1616A7",
+    "#DA60CA",
+    "#6C4516",
+    "#0D2A63",
+    "#AF0038",
+]
 
-class _BarChartRace:
-    
-    def __init__(self, df, filename, orientation, sort, n_bars, label_bars, use_index, 
-                 steps_per_period, period_length, figsize, cmap, title, bar_label_size, tick_label_size, 
-                 period_label_size, fig, kwargs):
+
+class _BaseChart:
+    def __init__(
+        self,
+        df: pd.DataFrame,
+        orientation: str,
+        sort: str,
+        use_index: bool,
+        steps_per_period: int,
+        period_length: int,
+        title: str,
+        figsize: Tuple,
+        dpi: int,
+        tick_label_size: int,
+        bar_label_size: int,
+        period_label_size: int,
+        fig: plt.Figure,
+        kwargs,
+    ) -> None:
         self.df = df
-        self.filename = filename
+        # self.filename = filename
         self.orientation = orientation
         self.sort = sort
-        self.n_bars = n_bars or df.shape[1]
-        self.label_bars = label_bars
         self.use_index = use_index
         self.steps_per_period = steps_per_period
         self.period_length = period_length
-        self.orig_index = self.df.index.astype('str')
+        self.orig_index = self.df.index.astype("str")
         self.title = title
         self.figsize = figsize
         self.dpi = 144
@@ -33,91 +68,172 @@ class _BarChartRace:
         self.fps = 1000 / self.period_length * steps_per_period
         self.fig = fig
         self.kwargs = kwargs
-        self.validate_params()
-        self.html = self.filename is None
-        self.bar_colors = self.get_colors(cmap)
-        self.x_label, self.y_label = self.get_label_position()
-        self.df_values, self.df_rank = self.prepare_data()
-        if self.fig is not None:
-            self.fig, self.ax = fig, fig.axes[0]
-            self.figsize = fig.get_size_inches()
-            self.dpi = fig.dpi
-        else:
-            self.fig, self.ax = self.create_figure()
+        # self.validate_params()
+        # self.html = self.filename is None
+        # self.bar_colors = self.get_colors(cmap)
+        # self.x_label, self.y_label = self.get_label_position()
+        # self.df_values, self.df_rank = self.prepare_data()
+        # if self.fig is not None:
+        #     self.fig, self.ax = fig, fig.axes[0]
+        #     self.figsize = fig.get_size_inches()
+        #     self.dpi = fig.dpi
+        # else:
+        #     self.fig, self.ax = self.create_figure()
 
-    def validate_params(self):
-        if isinstance(self.filename, str):
-            if '.' not in self.filename:
-                raise ValueError('`filename` must have an extension')
-        elif self.filename is not None:
-            raise TypeError('`filename` must be None or a string')
-            
-        if self.sort not in ('asc', 'desc'):
+    def validate_params(self) -> None:
+        if self.sort not in ("asc", "desc"):
             raise ValueError('`sort` must be "asc" or "desc"')
 
-        if self.orientation not in ('h', 'v'):
+        if self.orientation not in ("h", "v"):
             raise ValueError('`orientation` must be "h" or "v"')
 
         if self.fig is not None and not isinstance(self.fig, plt.Figure):
-            raise TypeError('`fig` must be a matplotlib Figure instance')
+            raise TypeError("`fig` must be a matplotlib Figure instance")
+
+
+class _BarChartRace(_BaseChart):
+    def __init__(
+        self,
+        df,
+        filename,
+        orientation,
+        sort,
+        n_bars,
+        label_bars,
+        use_index,
+        steps_per_period,
+        period_length,
+        figsize,
+        cmap,
+        title,
+        bar_label_size,
+        tick_label_size,
+        period_label_size,
+        fig,
+        kwargs,
+    ):
+        super().__init__(
+            df,
+            orientation,
+            sort,
+            use_index,
+            steps_per_period,
+            period_length,
+            title,
+            figsize,
+            144,
+            tick_label_size,
+            bar_label_size,
+            period_label_size,
+            fig,
+            kwargs,
+        )
+        # super().validate_params()
+        # self.df = df
+        self.filename = filename
+        self.validate_params()
+        # self.orientation = orientation
+        # self.sort = sort
+        # self.n_bars = n_bars or df.shape[1]
+        # self.label_bars = label_bars
+        # self.use_index = use_index
+        # self.steps_per_period = steps_per_period
+        # self.period_length = period_length
+        # self.orig_index = self.df.index.astype("str")
+        # self.title = title
+        # self.figsize = figsize
+        # self.dpi = 144
+        # self.tick_label_size = tick_label_size
+        # self.bar_label_size = bar_label_size
+        # self.period_label_size = period_label_size
+        # self.fps = 1000 / self.period_length * steps_per_period
+        # self.fig = fig
+        # self.kwargs = kwargs
+        # self.validate_params()
+        # self.html = self.filename is None
+        # self.bar_colors = self.get_colors(cmap)
+        # self.x_label, self.y_label = self.get_label_position()
+        # self.df_values, self.df_rank = self.prepare_data()
+        # if self.fig is not None:
+        #     self.fig, self.ax = fig, fig.axes[0]
+        #     self.figsize = fig.get_size_inches()
+        #     self.dpi = fig.dpi
+        # else:
+        #     self.fig, self.ax = self.create_figure()
+
+    def validate_params(self):
+        super().validate_params()
+        if isinstance(self.filename, str):
+            if '.' not in self.filename:
+                raise ValueError('`filename` must have an extension')
+            if len(self.filename.split('.')[1]) <= 0:
+                raise ValueError('`filename` must have an extension')
+        elif self.filename is not None:
+            raise TypeError('`filename` must be None or a string')
 
     def get_colors(self, cmap):
         if isinstance(cmap, str):
-            cmap = DARK24 if cmap == 'dark24' else plt.cm.get_cmap(cmap)
+            cmap = DARK24 if cmap == "dark24" else plt.cm.get_cmap(cmap)
         if isinstance(cmap, colors.Colormap):
             bar_colors = cmap(range(cmap.N)).tolist()
         elif isinstance(cmap, list):
             bar_colors = cmap
-        elif hasattr(cmap, 'tolist'):
+        elif hasattr(cmap, "tolist"):
             bar_colors = cmap.tolist()
         else:
-            raise TypeError('`cmap` must be a string name of a colormap, a matplotlib colormap instance' \
-                            'or a list of colors')
+            raise TypeError(
+                "`cmap` must be a string name of a colormap, a matplotlib colormap instance"
+                "or a list of colors"
+            )
 
         # bar_colors is now a list
         n = len(bar_colors)
         if self.df.shape[1] > n:
             bar_colors = bar_colors * (self.df.shape[1] // n + 1)
-        return np.array(bar_colors[:self.df.shape[1]])
+        return np.array(bar_colors[: self.df.shape[1]])
 
     def get_label_position(self):
-        if self.orientation == 'h':
-            x_label = .6
-            y_label = .25 if self.sort == 'desc' else .8
+        if self.orientation == "h":
+            x_label = 0.6
+            y_label = 0.25 if self.sort == "desc" else 0.8
         else:
-            x_label = .7 if self.sort == 'desc' else .1
-            y_label = .8
+            x_label = 0.7 if self.sort == "desc" else 0.1
+            y_label = 0.8
         return x_label, y_label
-        
+
     def prepare_data(self):
         df_values = self.df.reset_index(drop=True)
         df_values.index = df_values.index * self.steps_per_period
-        df_rank = df_values.rank(axis=1, method='first', ascending=False).clip(upper=self.n_bars + 1)
-        if (self.sort == 'desc' and self.orientation == 'h') or (self.sort == 'asc' and self.orientation == 'v'):
+        df_rank = df_values.rank(axis=1, method="first", ascending=False).clip(
+            upper=self.n_bars + 1
+        )
+        if (self.sort == "desc" and self.orientation == "h") or (
+            self.sort == "asc" and self.orientation == "v"
+        ):
             df_rank = self.n_bars + 1 - df_rank
         new_index = range(df_values.index.max() + 1)
         df_values = df_values.reindex(new_index).interpolate()
         df_rank = df_rank.reindex(new_index).interpolate()
         return df_values, df_rank
-        
+
     def create_figure(self):
         fig = plt.Figure(figsize=self.figsize, dpi=self.dpi)
-        limit = (.2, self.n_bars + .8)
+        limit = (0.2, self.n_bars + 0.8)
         rect = self.calculate_new_figsize(fig)
         ax = fig.add_axes(rect)
-        if self.orientation == 'h':
+        if self.orientation == "h":
             ax.set_ylim(limit)
-            ax.grid(True, axis='x', color='white')
-            ax.xaxis.set_major_formatter(ticker.StrMethodFormatter('{x:,.0f}'))
+            ax.grid(True, axis="x", color="white")
+            ax.xaxis.set_major_formatter(ticker.StrMethodFormatter("{x:,.0f}"))
         else:
             ax.set_xlim(limit)
-            ax.grid(True, axis='y', color='white')
-            ax.set_xticklabels(ax.get_xticklabels(), ha='right', rotation=30)
-            ax.yaxis.set_major_formatter(ticker.StrMethodFormatter('{x:,.0f}'))
+            ax.grid(True, axis="y", color="white")
+            ax.set_xticklabels(ax.get_xticklabels(), ha="right", rotation=30)
+            ax.yaxis.set_major_formatter(ticker.StrMethodFormatter("{x:,.0f}"))
 
         ax.set_axisbelow(True)
         ax.tick_params(length=0, labelsize=self.tick_label_size, pad=2)
-        ax.set_facecolor('.9')
+        ax.set_facecolor(".9")
         ax.set_title(self.title)
         for spine in ax.spines.values():
             spine.set_visible(False)
@@ -125,13 +241,14 @@ class _BarChartRace:
 
     def calculate_new_figsize(self, real_fig):
         import io
+
         fig = plt.Figure(tight_layout=True, figsize=self.figsize)
         ax = fig.add_subplot()
         fake_cols = [chr(i + 70) for i in range(self.df.shape[1])]
         max_val = self.df_values.max().max()
-        if self.orientation == 'h':
+        if self.orientation == "h":
             ax.barh(fake_cols, [1] * self.df.shape[1])
-            ax.tick_params(labelrotation=0, axis='y', labelsize=self.tick_label_size)
+            ax.tick_params(labelrotation=0, axis="y", labelsize=self.tick_label_size)
             ax.set_title(self.title)
             fig.canvas.print_figure(io.BytesIO())
             orig_pos = ax.get_position()
@@ -139,14 +256,14 @@ class _BarChartRace:
             ax.set_xticklabels([max_val] * len(ax.get_xticks()))
         else:
             ax.bar(fake_cols, [1] * self.df.shape[1])
-            ax.tick_params(labelrotation=30, axis='x', labelsize=self.tick_label_size)
+            ax.tick_params(labelrotation=30, axis="x", labelsize=self.tick_label_size)
             ax.set_title(self.title)
             fig.canvas.print_figure(io.BytesIO())
             orig_pos = ax.get_position()
-            ax.set_xticklabels(self.df.columns, ha='right')
+            ax.set_xticklabels(self.df.columns, ha="right")
             ax.set_yticklabels([max_val] * len(ax.get_yticks()))
-        
-        fig.canvas.print_figure(io.BytesIO(), format='png')
+
+        fig.canvas.print_figure(io.BytesIO(), format="png")
         new_pos = ax.get_position()
 
         coordx, prev_coordx = new_pos.x0, orig_pos.x0
@@ -170,7 +287,7 @@ class _BarChartRace:
         width = orig_pos.x1 - left
         height = orig_pos.y1 - bottom
         return [left, bottom, width, height]
-            
+
     def plot_bars(self, i):
         bar_location = self.df_rank.iloc[i].values
         top_filt = (bar_location > 0) & (bar_location < self.n_bars + 1)
@@ -178,75 +295,122 @@ class _BarChartRace:
         bar_length = self.df_values.iloc[i].values[top_filt]
         cols = self.df.columns[top_filt]
         colors = self.bar_colors[top_filt]
-        if self.orientation == 'h':
-            self.ax.barh(bar_location, bar_length, ec='white', tick_label=cols, color=colors, **self.kwargs)
+        if self.orientation == "h":
+            self.ax.barh(
+                bar_location,
+                bar_length,
+                ec="white",
+                tick_label=cols,
+                color=colors,
+                **self.kwargs,
+            )
             self.ax.set_xlim(self.ax.get_xlim()[0], bar_length.max() * 1.1)
         else:
-            self.ax.bar(bar_location, bar_length, ec='white', tick_label=cols, color=colors, **self.kwargs)
+            self.ax.bar(
+                bar_location,
+                bar_length,
+                ec="white",
+                tick_label=cols,
+                color=colors,
+                **self.kwargs,
+            )
             self.ax.set_ylim(self.ax.get_ylim()[0], bar_length.max() * 1.16)
 
         if self.use_index:
             val = self.orig_index[i // self.steps_per_period]
             num_texts = len(self.ax.texts)
             if num_texts == 0:
-                self.ax.text(self.x_label, self.y_label, val, transform=self.ax.transAxes, fontsize=self.period_label_size)
+                self.ax.text(
+                    self.x_label,
+                    self.y_label,
+                    val,
+                    transform=self.ax.transAxes,
+                    fontsize=self.period_label_size,
+                )
             else:
                 self.ax.texts[0].set_text(val)
 
         if self.label_bars:
-            for text in self.ax.texts[int(self.use_index):]:
+            for text in self.ax.texts[int(self.use_index) :]:
                 text.remove()
-            if self.orientation == 'h':
+            if self.orientation == "h":
                 zipped = zip(bar_length, bar_location)
             else:
                 zipped = zip(bar_location, bar_length)
 
             for x1, y1 in zipped:
                 xtext, ytext = self.ax.transLimits.transform((x1, y1))
-                if self.orientation == 'h':
-                    xtext += .01
-                    text = f'{x1:,.0f}'
+                if self.orientation == "h":
+                    xtext += 0.01
+                    text = f"{x1:,.0f}"
                     rotation = 0
-                    ha = 'left'
-                    va = 'center'
+                    ha = "left"
+                    va = "center"
                 else:
-                    ytext += .015
-                    text = f'{y1:,.0f}'
+                    ytext += 0.015
+                    text = f"{y1:,.0f}"
                     rotation = 90
-                    ha = 'center'
-                    va = 'bottom'
+                    ha = "center"
+                    va = "bottom"
                 xtext, ytext = self.ax.transLimits.inverted().transform((xtext, ytext))
-                self.ax.text(xtext, ytext, text, ha=ha, rotation=rotation, 
-                             fontsize=self.bar_label_size, va=va)
+                self.ax.text(
+                    xtext,
+                    ytext,
+                    text,
+                    ha=ha,
+                    rotation=rotation,
+                    fontsize=self.bar_label_size,
+                    va=va,
+                )
 
     def anim_func(self, i):
         for bar in self.ax.containers:
             bar.remove()
         self.plot_bars(i)
-        
+
     def make_animation(self):
         def init_func():
             self.plot_bars(0)
-        
+
         interval = self.period_length / self.steps_per_period
-        anim = FuncAnimation(self.fig, self.anim_func, range(len(self.df_values)), 
-                             init_func, interval=interval)
+        anim = FuncAnimation(
+            self.fig,
+            self.anim_func,
+            range(len(self.df_values)),
+            init_func,
+            interval=interval,
+        )
 
         if self.html:
             return anim.to_html5_video()
 
-        extension = self.filename.split('.')[-1]
-        if extension == 'gif':
-            anim.save(self.filename, fps=self.fps, writer='imagemagick')
+        extension = self.filename.split(".")[-1]
+        if extension == "gif":
+            anim.save(self.filename, fps=self.fps, writer="imagemagick")
         else:
             anim.save(self.filename, fps=self.fps)
 
 
-def bar_chart_race(df, filename=None, orientation='h', sort='desc', n_bars=None, label_bars=True, 
-                   use_index=True, steps_per_period=10, period_length=500, figsize=(6.5, 3.5), cmap='dark24', 
-                   title=None, bar_label_size=7, tick_label_size=7, period_label_size=16, 
-                   fig=None, **kwargs):
-    '''
+def bar_chart_race(
+    df,
+    filename=None,
+    orientation="h",
+    sort="desc",
+    n_bars=None,
+    label_bars=True,
+    use_index=True,
+    steps_per_period=10,
+    period_length=500,
+    figsize=(6.5, 3.5),
+    cmap="dark24",
+    title=None,
+    bar_label_size=7,
+    tick_label_size=7,
+    period_label_size=16,
+    fig=None,
+    **kwargs,
+):
+    """
     Create an animated bar chart race using matplotlib. Data must be in 'wide' format where each
     row represents a single time period and each column represents a distinct category. 
     Optionally, the index can label the time period.
@@ -346,15 +510,32 @@ def bar_chart_race(df, filename=None, orientation='h', sort='desc', n_bars=None,
         tick_label_size=7,
         period_label_size=16,
         fig=None)
-    '''
-    return _BarChartRace(df, filename, orientation, sort, n_bars, label_bars, use_index, steps_per_period, 
-                        period_length, figsize, cmap, title, bar_label_size, tick_label_size, 
-                        period_label_size, fig, kwargs)
-    
+    """
+    return _BarChartRace(
+        df,
+        filename,
+        orientation,
+        sort,
+        n_bars,
+        label_bars,
+        use_index,
+        steps_per_period,
+        period_length,
+        figsize,
+        cmap,
+        title,
+        bar_label_size,
+        tick_label_size,
+        period_label_size,
+        fig,
+        kwargs,
+    )
+
     # return bcr.make_animation()
 
-def load_dataset(name='covid19'):
-    '''
+
+def load_dataset(name="covid19"):
+    """
     Return a pandas DataFrame suitable for immediate use in `bar_chart_race`
 
     Parameters
@@ -365,6 +546,9 @@ def load_dataset(name='covid19'):
     Returns
     -------
     pandas DataFrame
-    '''
-    return pd.read_csv(f'https://raw.githubusercontent.com/dexplo/bar_chart_race/master/data/{name}.csv', 
-                       index_col='date', parse_dates=['date'])
+    """
+    return pd.read_csv(
+        f"https://raw.githubusercontent.com/dexplo/bar_chart_race/master/data/{name}.csv",
+        index_col="date",
+        parse_dates=["date"],
+    )
