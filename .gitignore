@@ -4,3 +4,7 @@ notebooks/
 *egg-info/
 build/
 dist/
+*.mypy_cache
+*.env
+test-main.py
+.vscode
