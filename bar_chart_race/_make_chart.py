@@ -126,11 +126,13 @@ class _LineChartRace(_BaseChart):
             self.dpi = fig.dpi
         else:
             self.fig = plt.figure()
-            self.ax = plt.axes(xlim=(series.index.min(),series.index.max()),ylim=(series.min(),series.max()))
+            self.ax = plt.axes()
 
 
 
     def plot_line(self, i):
+        self.ax.set_xlim(self.series.index.min(),self.series.index.max())
+        self.ax.set_ylim((self.series.min(),self.series.max()))
         self.xdata.append(self.series.index[i])
         self.ydata.append(self.series.iloc[i])
         self.ax.plot(self.xdata,self.ydata,self.line_width)
@@ -145,7 +147,7 @@ class _LineChartRace(_BaseChart):
         self.ax.plot([],[],self.line_width)
 
     def get_frames(self):
-        range(len(self.series))
+        return range(len(self.series))
 
     def make_animation(self):
         
@@ -668,14 +670,15 @@ def animate_multiple_plots(filename: str,plots: List[Union[_BarChartRace,_LineCh
 
     fig, axes = plt.subplots(len(plots))
     for num, plot in enumerate(plots):
-        plot.fig = axes[num]
+        plot.ax = axes[num]
+        
         plot.init_func()
 
     interval = plots[0].period_length / plots[0].steps_per_period
     anim = FuncAnimation(
             fig,
             update_all_graphs,
-            50,
+            min([max(plot.get_frames()) for plot in plots]),
             # plots[0].get_frames(),
             # init_func,
             interval=interval,
