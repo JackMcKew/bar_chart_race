@@ -3,7 +3,7 @@ import numpy as np
 import matplotlib.pyplot as plt
 from matplotlib.animation import FuncAnimation
 from matplotlib import ticker, colors
-from typing import Tuple, Union
+from typing import Tuple, Union, List
 
 DARK24 = [
     "#2E91E5",
@@ -141,12 +141,17 @@ class _LineChartRace(_BaseChart):
             line.remove()
         self.plot_line(i)
 
+    def init_func(self) -> None:
+        self.ax.plot([],[],self.line_width)
+
+    def get_frames(self):
+        range(len(self.series))
+
     def make_animation(self):
-        def init_func():
-            self.ax.plot([],[],self.line_width)
+        
             # self.line.set_data([],[])
 
-        anim = super().make_animation(range(len(self.series)), init_func)
+        anim = super().make_animation(self.get_frames(), self.init_func)
 
         extension = self.filename.split(".")[-1]
         if extension == "gif":
@@ -192,7 +197,6 @@ class _BarChartRace(_BaseChart):
         )
         self.df = df
         self.filename = filename
-        self.validate_params()
         self.orientation = orientation
         self.sort = sort
         self.n_bars = n_bars or df.shape[1]
@@ -436,11 +440,15 @@ class _BarChartRace(_BaseChart):
             bar.remove()
         self.plot_bars(i)
 
-    def make_animation(self):
-        def init_func():
-            self.plot_bars(0)
+    def init_func(self):
+        self.plot_bars(0)
 
-        anim = super().make_animation(range(len(self.df_values)), init_func)
+    def get_frames(self):
+        return range(len(self.df_values))
+
+    def make_animation(self):
+        
+        anim = super().make_animation(self.get_frames(), self.init_func)
 
         if self.html:
             return anim.to_html5_video()
@@ -646,3 +654,35 @@ def load_dataset(name="covid19"):
         index_col="date",
         parse_dates=["date"],
     )
+
+def animate_multiple_plots(filename: str,plots: List[Union[_BarChartRace,_LineChartRace]]):
+    """ Plot multiple animated plots
+
+    Args:
+        plots (List[Union[_BarChartRace,_LineChartRace]]): List of plots to animate
+    """
+
+    def update_all_graphs(frame):
+        for plot in plots:
+            plot.anim_func(frame)
+
+    fig, axes = plt.subplots(len(plots))
+    for num, plot in enumerate(plots):
+        plot.fig = axes[num]
+        plot.init_func()
+
+    interval = plots[0].period_length / plots[0].steps_per_period
+    anim = FuncAnimation(
+            fig,
+            update_all_graphs,
+            50,
+            # plots[0].get_frames(),
+            # init_func,
+            interval=interval,
+        )
+
+    extension = filename.split(".")[-1]
+    if extension == "gif":
+        anim.save(filename, fps=plots[0].fps, writer="imagemagick")
+    else:
+        anim.save(filename, fps=plots[0].fps)

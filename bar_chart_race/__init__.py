@@ -1,1 +1,1 @@
-from ._make_chart import bar_chart_race, load_dataset, line_chart_race
+from ._make_chart import bar_chart_race, load_dataset, line_chart_race, animate_multiple_plots
