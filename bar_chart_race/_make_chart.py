@@ -63,11 +63,7 @@ class _BarChartRace:
 
     def get_colors(self, cmap):
         if isinstance(cmap, str):
-            if cmap == 'dark24':
-                cmap = DARK24
-            else:
-                cmap = plt.cm.get_cmap(cmap)
-
+            cmap = DARK24 if cmap == 'dark24' else plt.cm.get_cmap(cmap)
         if isinstance(cmap, colors.Colormap):
             bar_colors = cmap(range(cmap.N)).tolist()
         elif isinstance(cmap, list):
@@ -188,10 +184,10 @@ class _BarChartRace:
         else:
             self.ax.bar(bar_location, bar_length, ec='white', tick_label=cols, color=colors, **self.kwargs)
             self.ax.set_ylim(self.ax.get_ylim()[0], bar_length.max() * 1.16)
-            
-        num_texts = len(self.ax.texts)
+
         if self.use_index:
             val = self.orig_index[i // self.steps_per_period]
+            num_texts = len(self.ax.texts)
             if num_texts == 0:
                 self.ax.text(self.x_label, self.y_label, val, transform=self.ax.transAxes, fontsize=self.period_label_size)
             else:
