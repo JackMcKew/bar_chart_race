@@ -37,8 +37,6 @@ class _BaseChart:
     def __init__(
         self,
         df: pd.DataFrame,
-        orientation: str,
-        sort: str,
         use_index: bool,
         steps_per_period: int,
         period_length: int,
@@ -52,46 +50,26 @@ class _BaseChart:
         kwargs,
     ) -> None:
         self.df = df
-        # self.filename = filename
-        self.orientation = orientation
-        self.sort = sort
         self.use_index = use_index
         self.steps_per_period = steps_per_period
         self.period_length = period_length
         self.orig_index = self.df.index.astype("str")
         self.title = title
         self.figsize = figsize
-        self.dpi = 144
+        self.dpi = dpi
         self.tick_label_size = tick_label_size
         self.bar_label_size = bar_label_size
         self.period_label_size = period_label_size
         self.fps = 1000 / self.period_length * steps_per_period
         self.fig = fig
         self.kwargs = kwargs
-        # self.validate_params()
-        # self.html = self.filename is None
-        # self.bar_colors = self.get_colors(cmap)
-        # self.x_label, self.y_label = self.get_label_position()
-        # self.df_values, self.df_rank = self.prepare_data()
-        # if self.fig is not None:
-        #     self.fig, self.ax = fig, fig.axes[0]
-        #     self.figsize = fig.get_size_inches()
-        #     self.dpi = fig.dpi
-        # else:
-        #     self.fig, self.ax = self.create_figure()
-
+        
     def validate_params(self) -> None:
-        if self.sort not in ("asc", "desc"):
-            raise ValueError('`sort` must be "asc" or "desc"')
-
-        if self.orientation not in ("h", "v"):
-            raise ValueError('`orientation` must be "h" or "v"')
-
         if self.fig is not None and not isinstance(self.fig, plt.Figure):
             raise TypeError("`fig` must be a matplotlib Figure instance")
 
     def anim_func(self, frame):
-        print("Animation function not yet implemeneted.")
+        raise NotImplementedError("Animation function not yet implemented")
 
     def make_animation(self, frames, init_func) -> FuncAnimation:
 
@@ -100,7 +78,6 @@ class _BaseChart:
             self.fig,
             self.anim_func,
             frames,
-            # range(len(self.df_values)),
             init_func,
             interval=interval,
         )
@@ -110,8 +87,6 @@ class _LineChartRace(_BaseChart):
     def __init__(
         self,
         df: pd.DataFrame,
-        orientation: str,
-        sort: str,
         use_index: bool,
         steps_per_period: int,
         period_length: int,
@@ -126,8 +101,6 @@ class _LineChartRace(_BaseChart):
     ) -> None:
         super().__init__(
             df,
-            orientation,
-            sort,
             use_index,
             steps_per_period,
             period_length,
@@ -166,8 +139,6 @@ class _BarChartRace(_BaseChart):
     ):
         super().__init__(
             df,
-            orientation,
-            sort,
             use_index,
             steps_per_period,
             period_length,
@@ -214,6 +185,13 @@ class _BarChartRace(_BaseChart):
 
     def validate_params(self):
         super().validate_params()
+        
+        if self.sort not in ("asc", "desc"):
+            raise ValueError('`sort` must be "asc" or "desc"')
+
+        if self.orientation not in ("h", "v"):
+            raise ValueError('`orientation` must be "h" or "v"')
+
         if isinstance(self.filename, str):
             if "." not in self.filename:
                 raise ValueError("`filename` must have an extension")
@@ -437,8 +415,6 @@ class _BarChartRace(_BaseChart):
 
 def line_chart_race(
     df,
-    orientation,
-    sort,
     use_index,
     steps_per_period,
     period_length,
@@ -452,8 +428,6 @@ def line_chart_race(
 ):
     return _LineChartRace(
         df,
-        orientation,
-        sort,
         use_index,
         steps_per_period,
         period_length,
