@@ -128,38 +128,37 @@ class _BarChartRace(_BaseChart):
             fig,
             kwargs,
         )
-        # super().validate_params()
-        # self.df = df
+        self.df = df
         self.filename = filename
         self.validate_params()
-        # self.orientation = orientation
-        # self.sort = sort
-        # self.n_bars = n_bars or df.shape[1]
-        # self.label_bars = label_bars
-        # self.use_index = use_index
-        # self.steps_per_period = steps_per_period
-        # self.period_length = period_length
-        # self.orig_index = self.df.index.astype("str")
-        # self.title = title
-        # self.figsize = figsize
-        # self.dpi = 144
-        # self.tick_label_size = tick_label_size
-        # self.bar_label_size = bar_label_size
-        # self.period_label_size = period_label_size
-        # self.fps = 1000 / self.period_length * steps_per_period
-        # self.fig = fig
-        # self.kwargs = kwargs
-        # self.validate_params()
-        # self.html = self.filename is None
-        # self.bar_colors = self.get_colors(cmap)
-        # self.x_label, self.y_label = self.get_label_position()
-        # self.df_values, self.df_rank = self.prepare_data()
-        # if self.fig is not None:
-        #     self.fig, self.ax = fig, fig.axes[0]
-        #     self.figsize = fig.get_size_inches()
-        #     self.dpi = fig.dpi
-        # else:
-        #     self.fig, self.ax = self.create_figure()
+        self.orientation = orientation
+        self.sort = sort
+        self.n_bars = n_bars or df.shape[1]
+        self.label_bars = label_bars
+        self.use_index = use_index
+        self.steps_per_period = steps_per_period
+        self.period_length = period_length
+        self.orig_index = self.df.index.astype("str")
+        self.title = title
+        self.figsize = figsize
+        self.dpi = 144
+        self.tick_label_size = tick_label_size
+        self.bar_label_size = bar_label_size
+        self.period_label_size = period_label_size
+        self.fps = 1000 / self.period_length * steps_per_period
+        self.fig = fig
+        self.kwargs = kwargs
+        self.validate_params()
+        self.html = self.filename is None
+        self.bar_colors = self.get_colors(cmap)
+        self.x_label, self.y_label = self.get_label_position()
+        self.df_values, self.df_rank = self.prepare_data()
+        if self.fig is not None:
+            self.fig, self.ax = fig, fig.axes[0]
+            self.figsize = fig.get_size_inches()
+            self.dpi = fig.dpi
+        else:
+            self.fig, self.ax = self.create_figure()
 
     def validate_params(self):
         super().validate_params()
