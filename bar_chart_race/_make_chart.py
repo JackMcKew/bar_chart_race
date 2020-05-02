@@ -347,10 +347,11 @@ def bar_chart_race(df, filename=None, orientation='h', sort='desc', n_bars=None,
         period_label_size=16,
         fig=None)
     '''
-    bcr = _BarChartRace(df, filename, orientation, sort, n_bars, label_bars, use_index, steps_per_period, 
+    return _BarChartRace(df, filename, orientation, sort, n_bars, label_bars, use_index, steps_per_period, 
                         period_length, figsize, cmap, title, bar_label_size, tick_label_size, 
                         period_label_size, fig, kwargs)
-    return bcr.make_animation()
+    
+    # return bcr.make_animation()
 
 def load_dataset(name='covid19'):
     '''
